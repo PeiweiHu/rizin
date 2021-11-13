@@ -222,6 +222,10 @@ RZ_API void rz_bin_symbol_free(RzBinSymbol *sym) {
 }
 
 RZ_API void rz_bin_reloc_free(RzBinReloc *reloc) {
+	if (reloc->symbol) {
+		free(reloc->symbol->name);
+	}
+	free(reloc->symbol);
 	free(reloc);
 }
 
