@@ -56,6 +56,13 @@ static bool pal_seek(RzCore *core, RzConsPalSeekMode mode, const char *file, RzL
 	return true;
 }
 
+/**
+ * \brief Load theme from \p name
+ * 
+ * \param core Current RzCore instance
+ * \param name Name of the theme to load
+ * \return bool true is successful, false otherwise
+ */
 RZ_API bool rz_core_theme_load(RzCore *core, const char *name) {
 	bool failed = false;
 	char *path;

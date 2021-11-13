@@ -2364,6 +2364,12 @@ RZ_IPI void rz_core_file_free(RzCoreFile *cf);
 
 RZ_IPI extern RzIOPlugin rz_core_io_plugin_vfile;
 
+/**
+ * \brief Initialize \p core
+ * 
+ * \param core RzCore instance to initialize
+ * \return bool true if successful, false otherwise
+ */
 RZ_API bool rz_core_init(RzCore *core) {
 	core->blocksize = RZ_CORE_BLOCKSIZE;
 	core->block = (ut8 *)calloc(RZ_CORE_BLOCKSIZE + 1, 1);
@@ -2603,6 +2609,12 @@ RZ_API void rz_core_bind_cons(RzCore *core) {
 	core->cons->user = (void *)core;
 }
 
+/**
+ * \brief Uninitialize core \p c
+ * 
+ * \param c RzCore instance to unintialize
+ * \return void
+ */
 RZ_API void rz_core_fini(RzCore *c) {
 	if (!c) {
 		return;
