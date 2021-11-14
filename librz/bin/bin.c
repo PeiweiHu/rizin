@@ -227,7 +227,8 @@ RZ_API void rz_bin_symbol_free(RzBinSymbol *sym) {
  * \param reloc RzBinReloc instance to free
  * \return void
  */
-RZ_API void rz_bin_reloc_free(RzBinReloc *reloc) {
+RZ_API void rz_bin_reloc_free(RZ_NONNULL RzBinReloc *reloc) {
+	rz_return_if_fail(reloc);
 	if (reloc->import) {
 		free(reloc->import->name);
 	}
