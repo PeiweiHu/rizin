@@ -846,7 +846,7 @@ RZ_API void rz_bin_symbol_free(RzBinSymbol *sym);
 static inline bool rz_bin_reloc_has_target(RzBinReloc *reloc) {
 	return reloc->target_vaddr && reloc->target_vaddr != UT64_MAX;
 }
-RZ_API void rz_bin_reloc_free(RZ_NONNULL  RzBinReloc *reloc);
+RZ_API void rz_bin_reloc_free(RzBinReloc *reloc);
 RZ_API RzBinSymbol *rz_bin_symbol_new(const char *name, ut64 paddr, ut64 vaddr);
 RZ_API void rz_bin_string_free(void *_str);
 

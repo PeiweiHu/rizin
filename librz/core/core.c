@@ -2676,6 +2676,7 @@ RZ_API void rz_core_fini(RzCore *c) {
 	rz_parse_free(c->parser);
 	free(c->times);
 	RZ_FREE(c->curtheme);
+	rz_core_seek_free(c);
 }
 
 RZ_API void rz_core_free(RzCore *c) {
