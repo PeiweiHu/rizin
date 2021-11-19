@@ -500,7 +500,6 @@ RZ_API void rz_bin_free(RzBin *bin) {
 	free(bin->force);
 	free(bin->srcdir);
 	free(bin->strenc);
-	// rz_bin_free_bin_files (bin);
 	rz_list_free(bin->binfiles);
 	rz_list_free(bin->binxtrs);
 	rz_list_free(bin->plugins);

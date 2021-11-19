@@ -2453,7 +2453,6 @@ RZ_API bool rz_core_init(RzCore *core) {
 		core->cons->user_fgets = (void *)rz_core_fgets;
 		core->cons->user_fgets_user = core;
 #endif
-		// rz_line_singleton ()->user = (void *)core;
 		rz_line_hist_load(RZ_HOME_HISTORY);
 	}
 	core->print->cons = core->cons;
@@ -2546,10 +2545,6 @@ RZ_API bool rz_core_init(RzCore *core) {
 	rz_core_bind(core, &core->dbg->bp->corebind);
 	rz_core_bind(core, &core->io->corebind);
 	core->dbg->analysis = core->analysis; // XXX: dupped instance.. can cause lost pointerz
-	// rz_debug_use (core->dbg, "native");
-	//  XXX pushing uninitialized regstate results in trashed reg values
-	//	rz_reg_arena_push (core->dbg->reg); // create a 2 level register state stack
-	//	core->dbg->analysis->reg = core->analysis->reg; // XXX: dupped instance.. can cause lost pointerz
 	core->io->cb_printf = rz_cons_printf;
 	core->dbg->cb_printf = rz_cons_printf;
 	core->dbg->bp->cb_printf = rz_cons_printf;
@@ -2558,7 +2553,6 @@ RZ_API bool rz_core_init(RzCore *core) {
 	rz_core_config_init(core);
 
 	rz_core_loadlibs_init(core);
-	// rz_core_loadlibs (core);
 
 	// TODO: get arch from rz_bin or from native arch
 	rz_asm_use(core->rasm, RZ_SYS_ARCH);
@@ -2642,8 +2636,6 @@ RZ_API void rz_core_fini(RzCore *c) {
 	rz_num_free(c->num);
 	// TODO: sync or not? sdb_sync (c->sdb);
 	// TODO: sync all dbs?
-	// rz_core_file_free (c->file);
-	// c->file = NULL;
 	RZ_FREE(c->table_query);
 	rz_list_free(c->files);
 	rz_list_free(c->watchers);
