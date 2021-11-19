@@ -722,7 +722,6 @@ typedef struct rz_bin_import_t {
 	char *classname;
 	char *descriptor;
 	ut32 ordinal;
-	ut32 visibility;
 } RzBinImport;
 
 typedef struct rz_bin_reloc_t {
