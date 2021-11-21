@@ -1607,8 +1607,8 @@ static const RzCmdDescHelp analysis_function_vars_sp_setref_help = {
 static const RzCmdDescDetailEntry ar_Register_space_Filter_detail_entries[] = {
 	{ .text = "ar", .arg_str = "", .comment = "Show a sensible default selection of registers" },
 	{ .text = "ar", .arg_str = " rax", .comment = "Show a single register" },
-	{ .text = "ar", .arg_str = " 16", .comment = "Show 16 bits wide registers" },
-	{ .text = "ar", .arg_str = " xmm", .comment = "Show registers of type xmm (see art for possible types)" },
+	{ .text = "ar", .arg_str = " 16", .comment = "Show 16 bits wide gpr registers" },
+	{ .text = "ar", .arg_str = " xmm", .comment = "Show registers of type xmm (see `art` for possible types)" },
 	{ .text = "ar", .arg_str = " all", .comment = "Show all registers available" },
 	{ 0 },
 };
@@ -8143,7 +8143,7 @@ RZ_IPI void rzshell_cmddescs_init(RzCore *core) {
 	RzCmdDesc *analysis_function_vars_sp_setref_cd = rz_cmd_desc_argv_new(core->rcmd, afvs_cd, "afvss", rz_analysis_function_vars_sp_setref_handler, &analysis_function_vars_sp_setref_help);
 	rz_warn_if_fail(analysis_function_vars_sp_setref_cd);
 
-	RzCmdDesc *ar_cd = rz_cmd_desc_group_modes_new(core->rcmd, cmd_analysis_cd, "ar", RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_RIZIN | RZ_OUTPUT_MODE_JSON, rz_analysis_regs_handler, &analysis_regs_help, &ar_help);
+	RzCmdDesc *ar_cd = rz_cmd_desc_group_state_new(core->rcmd, cmd_analysis_cd, "ar", RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_RIZIN | RZ_OUTPUT_MODE_JSON, rz_analysis_regs_handler, &analysis_regs_help, &ar_help);
 	rz_warn_if_fail(ar_cd);
 	RzCmdDesc *analysis_regs_columns_cd = rz_cmd_desc_argv_new(core->rcmd, ar_cd, "ar=", rz_analysis_regs_columns_handler, &analysis_regs_columns_help);
 	rz_warn_if_fail(analysis_regs_columns_cd);

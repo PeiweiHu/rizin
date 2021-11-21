@@ -9623,8 +9623,8 @@ RZ_IPI RzCmdStatus rz_analysis_xrefs_graph_handler(RzCore *core, int argc, const
 	return RZ_CMD_STATUS_OK;
 }
 
-RZ_IPI RzCmdStatus rz_analysis_regs_handler(RzCore *core, int argc, const char **argv, RzOutputMode mode) {
-	return rz_regs_handler(core, core->analysis->reg, argc, argv, mode);
+RZ_IPI RzCmdStatus rz_analysis_regs_handler(RzCore *core, int argc, const char **argv, RzCmdStateOutput *state) {
+	return rz_regs_handler(core, core->analysis->reg, argc, argv, state);
 }
 
 RZ_IPI RzCmdStatus rz_analysis_regs_columns_handler(RzCore *core, int argc, const char **argv) {

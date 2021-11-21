@@ -242,61 +242,6 @@ RZ_IPI bool rz_core_debug_reg_set(RzCore *core, const char *regname, ut64 val, c
 	return true;
 }
 
-static bool foreach_reg_cb(RzIntervalNode *node, void *user) {
-	RzRegItem *from_list = user;
-	RzRegItem *from_tree = node->data;
-	if (from_list == from_tree) {
-		return true;
-	}
-	// Check if from_list is covered entirely by from_tree, but is also smaller than it.
-	// We already know that
-	//   from_tree->offset <= from_list->offset < from_tree->offset + from_tree->size
-	if (from_list->offset + from_list->size > from_tree->offset + from_tree->size) {
-		// from_list expands beyond from_tree, so it's not covered
-		return true;
-	}
-	if (from_list->offset + from_list->size == from_tree->offset + from_tree->size) {
-		// they end at the same position, so it is covered entirely, but is it also smaller?
-		if (from_list->offset == from_tree->offset) {
-			// nope
-			return true;
-		}
-	}
-	// from_list ends before from_tree, so it is covered and smaller
-	return false;
-}
-
-/// Filter out all registers that are smaller than but covered entirely by some other register
-static RZ_OWN RzList *regs_filter_covered(RZ_BORROW const RzList /* <RzRegItem> */ *regs) {
-	RzList *ret = rz_list_new();
-	if (!ret) {
-		return NULL;
-	}
-	RzIntervalTree t;
-	rz_interval_tree_init(&t, NULL);
-	RzRegItem *item;
-	RzListIter *it;
-	rz_list_foreach (regs, it, item) {
-		if (item->offset < 0 || item->size <= 0) {
-			continue;
-		}
-		rz_interval_tree_insert(&t, item->offset, item->offset + item->size - 1, item);
-	}
-	rz_list_foreach (regs, it, item) {
-		if (item->offset < 0 || item->size <= 0) {
-			rz_list_push(ret, item);
-			continue;
-		}
-		if (!rz_interval_tree_all_in(&t, item->offset, true, foreach_reg_cb, item)) {
-			// foreach_reg_cb break-ed so it found a cover
-			continue;
-		}
-		rz_list_push(ret, item);
-	}
-	rz_interval_tree_fini(&t);
-	return ret;
-}
-
 RZ_IPI bool rz_core_debug_reg_list(RzCore *core, int type, int size, bool skip_covered, PJ *pj, int rad, const char *use_color) {
 	RzDebug *dbg = core->dbg;
 	int delta, cols, n = 0;
@@ -351,7 +296,7 @@ RZ_IPI bool rz_core_debug_reg_list(RzCore *core, int type, int size, bool skip_c
 	}
 	RzList *filtered_list = NULL;
 	if (skip_covered) {
-		filtered_list = regs_filter_covered(head);
+		filtered_list = rz_reg_filter_items_covered(head);
 		if (filtered_list) {
 			head = filtered_list;
 		}

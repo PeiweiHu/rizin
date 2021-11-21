@@ -231,6 +231,8 @@ RZ_API const char *rz_reg_cond_to_string(int n);
 RZ_API int rz_reg_cond_from_string(const char *str);
 RZ_API void rz_reg_arena_shrink(RzReg *reg);
 
+RZ_API RZ_OWN RzList *rz_reg_filter_items_covered(RZ_BORROW RZ_NONNULL const RzList /* <RzRegItem> */ *regs);
+
 #ifdef __cplusplus
 }
 #endif
