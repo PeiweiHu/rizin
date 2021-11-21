@@ -383,6 +383,47 @@ commands:
                     type: RZ_CMD_ARG_TYPE_RZNUM
                   - name: addr
                     type: RZ_CMD_ARG_TYPE_RZNUM
+  - name: ar
+    summary: Emulation Registers
+    subcommands:
+      - name: ar
+        summary: Show registers with their values
+        type: RZ_CMD_DESC_TYPE_ARGV_MODES
+        cname: analysis_regs
+        modes:
+          - RZ_OUTPUT_MODE_STANDARD
+          - RZ_OUTPUT_MODE_RIZIN
+          - RZ_OUTPUT_MODE_JSON
+        args:
+          - name: filter
+            type: RZ_CMD_ARG_TYPE_REG_FILTER
+            optional: true
+      - name: ar=
+        summary: Show registers in columns
+        type: RZ_CMD_DESC_TYPE_ARGV
+        cname: analysis_regs_columns
+        args:
+          - name: filter
+            type: RZ_CMD_ARG_TYPE_REG_FILTER
+            optional: true
+    details:
+      - name: Register Filter
+        entries:
+          - text: "ar"
+            arg_str: ""
+            comment: Show a sensible default selection of registers
+          - text: "ar"
+            arg_str: " rax"
+            comment: Show a single register
+          - text: "ar"
+            arg_str: " 16"
+            comment: Show 16 bits wide registers
+          - text: "ar"
+            arg_str: " xmm"
+            comment: Show registers of type xmm (see art for possible types)
+          - text: "ar"
+            arg_str: " all"
+            comment: Show all registers available
   - name: av
     summary: C++ vtables and RTTI
     subcommands:

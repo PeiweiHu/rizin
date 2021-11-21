@@ -151,6 +151,10 @@ RZ_IPI void rz_core_flag_describe(RzCore *core, ut64 addr, bool strict_offset, R
 RZ_IPI void rz_core_dbg_follow_seek_register(RzCore *core);
 RZ_IPI void rz_core_static_debug_stop(void *u);
 
+/* cmd_regs.c */
+RZ_IPI RzCmdStatus rz_regs_handler(RzCore *core, RzReg *reg, int argc, const char **argv, RzOutputMode mode);
+RZ_IPI RzCmdStatus rz_regs_columns_handler(RzCore *core, RzReg *reg, int argc, const char **argv);
+
 #if __WINDOWS__
 /* windows_heap.c */
 RZ_IPI RzList *rz_heap_blocks_list(RzCore *core);

@@ -11,6 +11,7 @@ static const RzCmdDescDetail system_details[2];
 static const RzCmdDescDetail system_to_cons_details[2];
 static const RzCmdDescDetail hash_bang_details[2];
 static const RzCmdDescDetail pointer_details[2];
+static const RzCmdDescDetail ar_details[2];
 static const RzCmdDescDetail cmd_debug_list_bp_details[2];
 static const RzCmdDescDetail cmd_debug_add_cond_bp_details[2];
 static const RzCmdDescDetail cmd_debug_add_watchpoint_details[2];
@@ -93,6 +94,8 @@ static const RzCmdDescArg analysis_function_vars_sp_args[4];
 static const RzCmdDescArg analysis_function_vars_sp_del_args[2];
 static const RzCmdDescArg analysis_function_vars_sp_getref_args[3];
 static const RzCmdDescArg analysis_function_vars_sp_setref_args[3];
+static const RzCmdDescArg analysis_regs_args[2];
+static const RzCmdDescArg analysis_regs_columns_args[2];
 static const RzCmdDescArg analysis_print_global_variable_args[2];
 static const RzCmdDescArg analysis_global_variable_add_args[4];
 static const RzCmdDescArg analysis_global_variable_delete_byaddr_args[2];
@@ -1599,6 +1602,50 @@ static const RzCmdDescArg analysis_function_vars_sp_setref_args[] = {
 static const RzCmdDescHelp analysis_function_vars_sp_setref_help = {
 	.summary = "Define var set reference",
 	.args = analysis_function_vars_sp_setref_args,
+};
+
+static const RzCmdDescDetailEntry ar_Register_space_Filter_detail_entries[] = {
+	{ .text = "ar", .arg_str = "", .comment = "Show a sensible default selection of registers" },
+	{ .text = "ar", .arg_str = " rax", .comment = "Show a single register" },
+	{ .text = "ar", .arg_str = " 16", .comment = "Show 16 bits wide registers" },
+	{ .text = "ar", .arg_str = " xmm", .comment = "Show registers of type xmm (see art for possible types)" },
+	{ .text = "ar", .arg_str = " all", .comment = "Show all registers available" },
+	{ 0 },
+};
+static const RzCmdDescDetail ar_details[] = {
+	{ .name = "Register Filter", .entries = ar_Register_space_Filter_detail_entries },
+	{ 0 },
+};
+static const RzCmdDescHelp ar_help = {
+	.summary = "Emulation Registers",
+	.details = ar_details,
+};
+static const RzCmdDescArg analysis_regs_args[] = {
+	{
+		.name = "filter",
+		.type = RZ_CMD_ARG_TYPE_REG_FILTER,
+		.optional = true,
+
+	},
+	{ 0 },
+};
+static const RzCmdDescHelp analysis_regs_help = {
+	.summary = "Show registers with their values",
+	.args = analysis_regs_args,
+};
+
+static const RzCmdDescArg analysis_regs_columns_args[] = {
+	{
+		.name = "filter",
+		.type = RZ_CMD_ARG_TYPE_REG_FILTER,
+		.optional = true,
+
+	},
+	{ 0 },
+};
+static const RzCmdDescHelp analysis_regs_columns_help = {
+	.summary = "Show registers in columns",
+	.args = analysis_regs_columns_args,
 };
 
 static const RzCmdDescHelp av_help = {
@@ -8095,6 +8142,11 @@ RZ_IPI void rzshell_cmddescs_init(RzCore *core) {
 
 	RzCmdDesc *analysis_function_vars_sp_setref_cd = rz_cmd_desc_argv_new(core->rcmd, afvs_cd, "afvss", rz_analysis_function_vars_sp_setref_handler, &analysis_function_vars_sp_setref_help);
 	rz_warn_if_fail(analysis_function_vars_sp_setref_cd);
+
+	RzCmdDesc *ar_cd = rz_cmd_desc_group_modes_new(core->rcmd, cmd_analysis_cd, "ar", RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_RIZIN | RZ_OUTPUT_MODE_JSON, rz_analysis_regs_handler, &analysis_regs_help, &ar_help);
+	rz_warn_if_fail(ar_cd);
+	RzCmdDesc *analysis_regs_columns_cd = rz_cmd_desc_argv_new(core->rcmd, ar_cd, "ar=", rz_analysis_regs_columns_handler, &analysis_regs_columns_help);
+	rz_warn_if_fail(analysis_regs_columns_cd);
 
 	RzCmdDesc *av_cd = rz_cmd_desc_group_modes_new(core->rcmd, cmd_analysis_cd, "av", RZ_OUTPUT_MODE_STANDARD | RZ_OUTPUT_MODE_RIZIN | RZ_OUTPUT_MODE_JSON, rz_analysis_list_vtables_handler, &analysis_list_vtables_help, &av_help);
 	rz_warn_if_fail(av_cd);

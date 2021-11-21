@@ -89,6 +89,7 @@ static bool lastcmd_repeat(RzCore *core, int next);
 #include "cmd_eval.c"
 #include "cmd_interpret.c"
 #include "cmd_analysis.c"
+#include "cmd_regs.c"
 #include "cmd_open.c"
 #include "cmd_type.c"
 #include "cmd_info.c"
