@@ -195,20 +195,22 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 
 	if (ro->import) {
 		RzBin *bin = rz_bin_new();
-		RzIO *io = rz_io_new();
-		if (!bin || !io) {
-			result = 1;
-			goto err;
+		RzIO *rio = rz_io_new();
+		if (!bin || !rio) {
+			free(efile);
+			return 1;
 		}
-		rz_io_bind(io, &bin->iob);
+		rz_io_bind(rio, &bin->iob);
 
 		RzBinOptions opt = { 0 };
 		rz_bin_options_init(&opt, 0, 0, 0, false, false);
 
 		RzBinFile *bf = rz_bin_open(bin, file, &opt);
 		if (!bf) {
-			result = 1;
-			goto err;
+			rz_bin_free(bin);
+			rz_io_free(rio);
+			free(efile);
+			return 1;
 		}
 
 		RzBinObject *obj = rz_bin_cur_object(bin);
@@ -224,6 +226,8 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 			}
 		}
 
+		rz_bin_free(bin);
+		rz_io_free(rio);
 		free(efile);
 		return 0;
 	}
