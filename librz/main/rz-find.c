@@ -12,11 +12,13 @@
 #include <rz_cons.h>
 #include <rz_lib.h>
 #include <rz_io.h>
+#include <rz_bin.h>
 
 typedef struct {
 	bool showstr;
 	bool rad;
 	bool identify;
+    bool import; // search import table
 	bool quiet;
 	bool hexstr;
 	bool widestr;
@@ -182,6 +184,7 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 
 	char *efile = rz_str_escape_sh(file);
 
+    // -i
 	if (ro->identify) {
 		char *cmd = rz_str_newf("rizin -e search.show=false -e search.maxhits=1 -nqcpm \"%s\"", efile);
 		rz_sys_xsystem(cmd);
@@ -190,22 +193,59 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 		return 0;
 	}
 
+    // 这里插入导入表搜索
+    if (ro->import) {
+        // 判断文件是否为二进制
+        RzBin *bin = rz_bin_new();
+        RzIO *io = rz_io_new();
+        rz_io_bind(io, &bin->iob);
+
+        RzBinOptions opt = { 0 };
+        rz_bin_options_init(&opt, 0, 0, 0, false, false);
+
+        RzBinFile *bf = rz_bin_open(bin, file, &opt);
+        // mu_assert_notnull(bf, "crackme0x00 binary could not be opened");
+        // mu_assert_notnull(bf->o, "bin object");
+        RzBinObject *obj = rz_bin_cur_object(bin);
+        const RzList *imports = rz_bin_object_get_imports(obj);
+        RzBinImport *import;
+        RzListIter *it;
+
+        rz_list_foreach (imports, it, import) {
+            // printf("testing %s with %s\n", import->name, kw);
+            rz_list_foreach (ro->keywords, iter, kw) {
+                if (!strcmp(import->name, kw)){
+                    // printf
+                    RzBinSymbol *sym = rz_bin_object_get_symbol_of_import(bf->o, import);
+                    // ut64 addr = sym ? rva(o, sym->paddr, sym->vaddr, va) : UT64_MAX;
+                    // printf("ordinal: %d, vaddr: 0x%08" PFMT64d " %s\n", import->ordinal, sym->paddr, kw);
+                    printf("ordinal: %d %s\n", import->ordinal, import->name);
+                }
+            }
+        }
+        return 0;
+    }
+
+    // 干嘛的？
 	RzIO *io = rz_io_new();
 	if (!io) {
 		free(efile);
 		return 1;
 	}
 
+    // 干嘛的？
 	if (!rz_io_open_nomap(io, file, RZ_PERM_R, 0)) {
 		eprintf("Cannot open file '%s'\n", file);
 		result = 1;
 		goto err;
 	}
 
+    // 无用 data=NULL
 	if (data) {
 		rz_io_write_at(io, 0, data, datalen);
 	}
 
+    // 设置了mode
 	rs = rz_search_new(ro->mode);
 	if (!rs) {
 		result = 1;
@@ -219,6 +259,13 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 		goto err;
 	}
 	rs->align = ro->align;
+    //
+    /*
+    RZ_API void rz_search_set_callback(RzSearch *s, RzSearchCallback(callback), void *user) {
+	    s->callback = callback;
+	    s->user = user;
+    }
+    */
 	rz_search_set_callback(rs, &hit, ro);
 	ut64 to = ro->to;
 	if (to == -1) {
@@ -265,6 +312,7 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 			} else if (ro->widestr) {
 				rz_search_kw_add(rs, rz_search_keyword_new_wide(kw, ro->mask, NULL, 0));
 			} else {
+                // 将 RzSearchKeyword 任务添加到RzSearch（rs）的kws列表里面
 				rz_search_kw_add(rs, rz_search_keyword_new_str(kw, ro->mask, NULL, 0));
 			}
 		}
@@ -274,14 +322,17 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 
 	ro->curfile = file;
 	rz_search_begin(rs);
+    // io->off = ro->from
 	(void)rz_io_seek(io, ro->from, RZ_IO_SEEK_SET);
 	result = 0;
 	ut64 bsize = ro->bsize;
 	for (ro->cur = ro->from; !last && ro->cur < to; ro->cur += bsize) {
+        // 到了末尾
 		if ((ro->cur + bsize) > to) {
 			bsize = to - ro->cur;
 			last = true;
 		}
+        // 从io读数据放到buf里面 返回读的长度
 		ret = rz_io_pread_at(io, ro->cur, ro->buf, bsize);
 		if (ret == 0) {
 			if (ro->nonstop) {
@@ -294,6 +345,8 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 			bsize = ret;
 		}
 
+        //rz_search_update(RzSearch *s, ut64 from, const ut8 *buf, long len)
+        //这里是真正执行搜索的位置
 		if (rz_search_update(rs, ro->cur, ro->buf, ret) == -1) {
 			eprintf("search: update read error at 0x%08" PFMT64x "\n", ro->cur);
 			break;
@@ -322,6 +375,7 @@ static int rzfind_open_dir(RzfindOptions *ro, const char *dir) {
 			if (*fname == '.') {
 				continue;
 			}
+            // printf("%s   %s\n", dir, fname);
 			fullpath = rz_str_newf("%s" RZ_SYS_DIR "%s", dir, fname);
 			(void)rzfind_open(ro, fullpath);
 			free(fullpath);
@@ -357,7 +411,12 @@ RZ_API int rz_main_rz_find(int argc, const char **argv) {
 	const char *file = NULL;
 
 	RzGetopt opt;
-	rz_getopt_init(&opt, argc, argv, "a:ie:b:jmM:s:S:x:Xzf:F:t:E:rqnhvZ");
+    /* opt string: 
+            single letter -> no argument
+            letter with one : -> must have argument
+            letter with two : -> optional argument
+    */
+	rz_getopt_init(&opt, argc, argv, "a:I:ie:b:jmM:s:S:x:Xzf:F:t:E:rqnhvZ");
 	while ((c = rz_getopt_next(&opt)) != -1) {
 		switch (c) {
 		case 'a':
@@ -387,6 +446,7 @@ RZ_API int rz_main_rz_find(int argc, const char **argv) {
 			ro.mode = RZ_SEARCH_ESIL;
 			rz_list_append(ro.keywords, (void *)opt.arg);
 			break;
+        // ----- rz-find -s lib /bin/ls
 		case 's':
 			ro.mode = RZ_SEARCH_KEYWORD;
 			ro.hexstr = false;
@@ -399,6 +459,10 @@ RZ_API int rz_main_rz_find(int argc, const char **argv) {
 			ro.widestr = true;
 			rz_list_append(ro.keywords, (void *)opt.arg);
 			break;
+        case 'I':
+            ro.import = true;
+            rz_list_append(ro.keywords, (void *)opt.arg);
+            break;
 		case 'b':
 			ro.bsize = rz_num_math(NULL, opt.arg);
 			break;
@@ -464,6 +528,7 @@ RZ_API int rz_main_rz_find(int argc, const char **argv) {
 	if (ro.json) {
 		printf("[");
 	}
+    // collect files
 	for (; opt.ind < argc; opt.ind++) {
 		file = argv[opt.ind];
 
@@ -472,6 +537,7 @@ RZ_API int rz_main_rz_find(int argc, const char **argv) {
 			rz_list_free(ro.keywords);
 			return 1;
 		}
+        // do operation
 		rzfind_open(&ro, file);
 	}
 	rz_list_free(ro.keywords);

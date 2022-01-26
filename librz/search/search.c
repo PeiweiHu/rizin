@@ -356,6 +356,12 @@ static bool brute_force_match(RzSearch *s, RzSearchKeyword *kw, const ut8 *buf, 
 }
 
 // Supported search variants: backward, binmask, icase, inverse, overlap
+/*
+    nhits: 记录找到了多少个
+    from: 开始寻找的地址
+    buf: 存储这次进行搜索的内容 buf = get(from : from + len)
+    len: 这次进行搜索的内容的长度
+*/
 RZ_API int rz_search_mybinparse_update(RzSearch *s, ut64 from, const ut8 *buf, int len) {
 	RzSearchKeyword *kw;
 	RzListIter *iter;
@@ -363,12 +369,14 @@ RZ_API int rz_search_mybinparse_update(RzSearch *s, ut64 from, const ut8 *buf, i
 	int longest = 0, i;
 	const int old_nhits = s->nhits;
 
+    // 找到最长的关键词的长度
 	rz_list_foreach (s->kws, iter, kw) {
 		longest = RZ_MAX(longest, kw->keyword_length);
 	}
 	if (!longest) {
 		return 0;
 	}
+
 	if (s->data) {
 		left = s->data;
 		if (left->end != from) {
@@ -400,6 +408,7 @@ RZ_API int rz_search_mybinparse_update(RzSearch *s, ut64 from, const ut8 *buf, i
 							      : 0;
 		for (; i + kw->keyword_length <= len1 && i < left->len; i++) {
 			if (brute_force_match(s, kw, left->data, i) != s->inverse) {
+                // 调用rz_search_hit_new是找到了
 				int t = rz_search_hit_new(s, kw, s->bckwrds ? from - kw->keyword_length - i + left->len : from + i - left->len);
 				if (!t) {
 					return -1;

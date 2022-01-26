@@ -55,6 +55,7 @@ RZ_API void rz_search_keyword_free(RzSearchKeyword *kw) {
 	free(kw);
 }
 
+//rz_search_keyword_new_str(kw, ro->mask, NULL, 0)
 RZ_API RzSearchKeyword *rz_search_keyword_new_str(const char *kwbuf, const char *bmstr, const char *data, int ignore_case) {
 	RzSearchKeyword *kw;
 	ut8 *bmbuf = NULL;
