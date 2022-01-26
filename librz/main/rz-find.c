@@ -225,7 +225,7 @@ static int rzfind_open_file(RzfindOptions *ro, const char *file, const ut8 *data
 		}
 		result = 0;
 
-import_end:
+	import_end:
 		rz_bin_free(bin);
 		rz_io_free(rio);
 		free(efile);
