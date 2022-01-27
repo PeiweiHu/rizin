@@ -109,6 +109,54 @@ RZ_API void rz_str_trim_head(char *str) {
 	}
 }
 
+/* Trim specific char from head. */
+RZ_API void rz_str_trim_ch_head(char *str, char ch) {
+	rz_return_if_fail(str);
+	char *p = str;
+	for (; *p && (*p == ch); p++) {
+		;
+	}
+	memmove(str, p, strlen(p) + 1);
+}
+
+RZ_API char *rz_str_trim_ch_head_dup(const char *str, char ch) {
+	char *p = strdup(str);
+	rz_str_trim_ch_head(p, ch);
+	return p;
+}
+
+/* Trim specific char from tail. */
+RZ_API void rz_str_trim_ch_tail(char *str, char ch) {
+	rz_return_if_fail(str);
+	size_t length = strlen(str);
+	while (length-- > 0) {
+		if (str[length] == ch) {
+			str[length] = '\0';
+		} else {
+			break;
+		}
+	}
+}
+
+RZ_API char *rz_str_trim_ch_tail_dup(const char *str, char ch) {
+	char *p = strdup(str);
+	rz_str_trim_ch_tail(p, ch);
+	return p;
+}
+
+/* Trim specific char. */
+RZ_API void rz_str_trim_ch(char *str, char ch) {
+	rz_str_trim_ch_head(str, ch);
+	rz_str_trim_ch_tail(str, ch);
+}
+
+RZ_API char *rz_str_trim_ch_dup(const char *str, char ch) {
+	char *p = strdup(str);
+	rz_str_trim_ch_head(p, ch);
+	rz_str_trim_ch_tail(p, ch);
+	return p;
+}
+
 /**
  * Remove whitespace chars from the tail of the string, replacing them with null bytes. The string is changed in-place.
  * \return the string itself

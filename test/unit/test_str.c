@@ -138,6 +138,22 @@ bool test_rz_str_trim(void) {
 	mu_end;
 }
 
+bool test_rz_str_trim_ch(void) {
+	// 1
+	char * one = "/home/rizin/";
+	one = rz_str_trim_ch_head_dup(one, '/');
+	mu_assert_streq(one, "home/rizin/", "one");
+	// 2
+	char * two = "/home/rizin/";
+	two = rz_str_trim_ch_tail_dup(two, '/');
+	mu_assert_streq(two, "/home/rizin", "two");
+	// 3
+	char * three = "/home/rizin/";
+	three = rz_str_trim_ch_dup(three, '/');
+	mu_assert_streq(three, "home/rizin", "three");
+	mu_end;
+}
+
 bool test_rz_str_bool(void) {
 	const char *one = rz_str_bool(1);
 	const char *zero = rz_str_bool(0);
@@ -686,6 +702,7 @@ bool all_tests() {
 	mu_run_test(test_rz_str_bool);
 	mu_run_test(test_rz_str_trim);
 	mu_run_test(test_rz_str_case);
+	mu_run_test(test_rz_str_trim_ch);
 	mu_run_test(test_rz_str_split);
 	mu_run_test(test_rz_str_split_list);
 	mu_run_test(test_rz_str_split_lines);

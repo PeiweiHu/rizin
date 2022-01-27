@@ -511,7 +511,7 @@ RZ_API int rz_main_rz_find(int argc, const char **argv) {
 		printf("[");
 	}
 	for (; opt.ind < argc; opt.ind++) {
-		file = argv[opt.ind];
+		file = rz_str_trim_ch_tail_dup(argv[opt.ind], '/');
 
 		if (RZ_STR_ISEMPTY(file)) {
 			eprintf("Cannot open empty path\n");
